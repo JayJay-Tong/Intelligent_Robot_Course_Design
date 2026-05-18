@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Administrator/.claude/skills/visiomaster/**)",
+      "Read(//c/Users/Administrator/.claude/skills/visiomaster/scripts/**)",
+      "Read(//c/Users/Administrator/.claude/skills/visiomaster/templates/**)"
+    ]
+  }
+}
