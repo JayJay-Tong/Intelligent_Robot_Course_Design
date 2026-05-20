@@ -21,7 +21,15 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
+#include <stdio.h>
 
+/* printf 重定向到 USART1 (MicroLIB 模式)
+ * 需要在 Keil: Target Options -> Target -> 勾选 Use MicroLIB */
+int fputc(int ch, FILE *f)
+{
+    HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 10);
+    return ch;
+}
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;

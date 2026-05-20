@@ -1,0 +1,10 @@
+script\stm32f10x_hc-sr04.o: HC-SR04\stm32f10x_HC-SR04.c
+script\stm32f10x_hc-sr04.o: .\HC-SR04\stm32f10x_HC-SR04.h
+script\stm32f10x_hc-sr04.o: F:\Keil_v5_MDK\Pack\Keil\STM32F1xx_DFP\2.4.1\Device\Include\stm32f10x.h
+script\stm32f10x_hc-sr04.o: .\RTE\_script\RTE_Components.h
+script\stm32f10x_hc-sr04.o: ../Drivers/CMSIS/Include/core_cm3.h
+script\stm32f10x_hc-sr04.o: F:\Keil_v5_MDK\ARM\ARMCC\Bin\..\include\stdint.h
+script\stm32f10x_hc-sr04.o: ../Drivers/CMSIS/Include/cmsis_version.h
+script\stm32f10x_hc-sr04.o: ../Drivers/CMSIS/Include/cmsis_compiler.h
+script\stm32f10x_hc-sr04.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
+script\stm32f10x_hc-sr04.o: F:\Keil_v5_MDK\Pack\Keil\STM32F1xx_DFP\2.4.1\Device\Include\system_stm32f10x.h

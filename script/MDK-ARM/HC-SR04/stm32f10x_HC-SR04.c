@@ -1,68 +1,98 @@
-#include <stm32f10x_HC-SR04.h>
+/**
+ * HC-SR04 超声波测距驱动 (HAL 库版本)
+ *
+ * 工作流程:
+ *     1) TRIG 拉高 >=10us 触发模块, 模块发出 8 个 40kHz 超声波脉冲;
+ *     2) ECHO 输出高电平, 时长 = 超声波往返飞行时间;
+ *     3) TIM2_CH1 输入捕获在 ECHO 上升沿记 t1, 切换到下降沿捕获记 t2;
+ *     4) 距离(mm) = (t2 - t1) us * 声速(0.343 mm/us) / 2 ≈ diff * 0.1715
+ *        等价计算: diff * 1715 / 10000  (避免浮点)
+ */
 
-extern void EnableHCSR04PeriphClock();
+#include "stm32f10x_HC-SR04.h"
+#include "tim.h"
 
-static void initMeasureTimer() {
-	RCC_ClocksTypeDef RCC_ClocksStatus;
-	RCC_GetClocksFreq(&RCC_ClocksStatus);
-	uint16_t prescaler = RCC_ClocksStatus.SYSCLK_Frequency / 1000000 - 1; //1 tick = 1us (1 tick = 0.165mm resolution)
+/* ---- 捕获状态 ---------------------------------------------------------- */
+static volatile uint32_t rise_tick     = 0;
+static volatile uint32_t fall_tick     = 0;
+static volatile uint8_t  capture_state = 0;   /* 0=等上升沿, 1=等下降沿 */
+static volatile uint8_t  capture_done  = 0;
 
-	TIM_DeInit(US_TIMER);
-	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
-	TIM_TimeBaseInitStruct.TIM_Prescaler = prescaler;
-	TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInitStruct.TIM_Period = 0xFFFF;
-	TIM_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1;
-	TIM_TimeBaseInit(US_TIMER, &TIM_TimeBaseInitStruct);
-
-	TIM_OCInitTypeDef TIM_OCInitStruct;
-	TIM_OCStructInit(&TIM_OCInitStruct);
-	TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM1;
-	TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStruct.TIM_Pulse = 15; //us
-	TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_High;
-	TIM_OC3Init(US_TIMER, &TIM_OCInitStruct);
-
-	TIM_ICInitTypeDef TIM_ICInitStruct;
-	TIM_ICInitStruct.TIM_Channel = TIM_Channel_1;
-	TIM_ICInitStruct.TIM_ICPolarity = TIM_ICPolarity_Rising;
-	TIM_ICInitStruct.TIM_ICSelection = TIM_ICSelection_DirectTI;
-	TIM_ICInitStruct.TIM_ICPrescaler = TIM_ICPSC_DIV1;
-	TIM_ICInitStruct.TIM_ICFilter = 0;
-
-	TIM_PWMIConfig(US_TIMER, &TIM_ICInitStruct);
-	TIM_SelectInputTrigger(US_TIMER, US_TIMER_TRIG_SOURCE);
-	TIM_SelectMasterSlaveMode(US_TIMER, TIM_MasterSlaveMode_Enable);
-
-	TIM_CtrlPWMOutputs(US_TIMER, ENABLE);
-
-	TIM_ClearFlag(US_TIMER, TIM_FLAG_Update);
+/* ---- DWT 微秒延时 (Cortex-M3 内核计数器) ------------------------------- */
+static void DWT_DelayInit(void)
+{
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CYCCNT       = 0;
+    DWT->CTRL        |= DWT_CTRL_CYCCNTENA_Msk;
 }
 
-static void initPins() {
-	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Pin = US_TRIG_PIN;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-	GPIO_Init(US_TRIG_PORT, &GPIO_InitStructure);
-
-	GPIO_InitStructure.GPIO_Pin = US_ECHO_PIN;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_Init(US_ECHO_PORT, &GPIO_InitStructure);
+static void delay_us(uint32_t us)
+{
+    uint32_t start = DWT->CYCCNT;
+    uint32_t ticks = us * (SystemCoreClock / 1000000U);
+    while ((DWT->CYCCNT - start) < ticks) { /* spin */ }
 }
 
-void InitHCSR04() {
-	EnableHCSR04PeriphClock();
-	initPins();
-	initMeasureTimer();
+/* ---- 对外接口 ---------------------------------------------------------- */
+void InitHCSR04(void)
+{
+    DWT_DelayInit();
+    HAL_GPIO_WritePin(HCSR04_TRIG_GPIO_Port, HCSR04_TRIG_Pin, GPIO_PIN_RESET);
+
+    __HAL_TIM_SET_CAPTUREPOLARITY(&htim2, TIM_CHANNEL_1, TIM_ICPOLARITY_RISING);
+    HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
 }
 
-int32_t HCSR04GetDistance() {
-	(US_TIMER)->CNT = 0;
-	TIM_Cmd(US_TIMER, ENABLE);
-	while(!TIM_GetFlagStatus(US_TIMER, TIM_FLAG_Update));
-	TIM_Cmd(US_TIMER, DISABLE);
-	TIM_ClearFlag(US_TIMER, TIM_FLAG_Update);
-	return (TIM_GetCapture2(US_TIMER)-TIM_GetCapture1(US_TIMER))*165/1000;
+int32_t HCSR04GetDistance(void)
+{
+    uint32_t t_start;
+    uint32_t diff;
+
+    /* 复位状态机 */
+    capture_state = 0;
+    capture_done  = 0;
+    __HAL_TIM_SET_COUNTER(&htim2, 0);
+    __HAL_TIM_SET_CAPTUREPOLARITY(&htim2, TIM_CHANNEL_1, TIM_ICPOLARITY_RISING);
+
+    /* 发送 >=10us 触发脉冲 (留 15us 余量) */
+    HAL_GPIO_WritePin(HCSR04_TRIG_GPIO_Port, HCSR04_TRIG_Pin, GPIO_PIN_SET);
+    delay_us(15);
+    HAL_GPIO_WritePin(HCSR04_TRIG_GPIO_Port, HCSR04_TRIG_Pin, GPIO_PIN_RESET);
+
+    /* 等待两次捕获完成, 最长 40ms (HC-SR04 最大回波 ~23ms @ 4m) */
+    t_start = HAL_GetTick();
+    while (!capture_done)
+    {
+        if ((HAL_GetTick() - t_start) > 40U) {
+            return -1;
+        }
+    }
+
+    /* 处理一次溢出 (ARR=65535) */
+    if (fall_tick >= rise_tick) {
+        diff = fall_tick - rise_tick;
+    } else {
+        diff = (0xFFFFu - rise_tick) + fall_tick + 1u;
+    }
+
+    return (int32_t)((diff * 1715U) / 10000U);   /* mm */
+}
+
+/* ---- TIM2_CH1 输入捕获中断回调 ---------------------------------------- */
+/* TIM2_IRQHandler -> HAL_TIM_IRQHandler -> 本回调 (HAL 库弱符号已被覆盖) */
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance != TIM2) return;
+    if (htim->Channel  != HAL_TIM_ACTIVE_CHANNEL_1) return;
+
+    if (capture_state == 0) {
+        rise_tick     = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+        capture_state = 1;
+        __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1, TIM_ICPOLARITY_FALLING);
+    } else {
+        fall_tick     = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+        capture_state = 0;
+        capture_done  = 1;
+        __HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1, TIM_ICPOLARITY_RISING);
+    }
 }

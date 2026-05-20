@@ -1,50 +1,32 @@
 #ifndef STM32F10X_HC_SR04_H_
 #define STM32F10X_HC_SR04_H_
 
-#include "stm32f10x.h"
+#include "main.h"
+#include <stdint.h>
 
-#define US_TIMER					TIM3
-
-#define US_TRIG_PORT				GPIOB
-#define US_TRIG_PIN					GPIO_Pin_0		//TIM Ch3 (trig output)
-
-#define US_ECHO_PORT				GPIOA
-#define US_ECHO_PIN					GPIO_Pin_6		//TIM Ch1 (echo input)
-#define US_TIMER_TRIG_SOURCE		TIM_TS_TI1FP1
-
-/**
- *	How to use this driver:
- * 	1. Implement EnableHCSR04PeriphClock function and turn on clock for used peripherals
- * 		ex:
- * 		void EnableHCSR04PeriphClock() {
- *			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
- *			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
- *			RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
- *		}
- *	2. Call InitHCSR04();
- *	3. Get distance (in mm) using HCSR04GetDistance function.
- *		Value lower than zero means no echo received (distance >3m)
- *		Measuring takes about 65ms
+/*
+ * HC-SR04 超声波测距驱动（STM32 HAL 库版本）
  *
- *	If necessary, change defines above, but be careful, US_ECHO_PIN must be tim ch1
- *	and US_TRIG_PIN must be ch3 or ch4. In case of ch4 change TIM_OC3Init into TIM_OC4Init in stm32f10x_HC-SR04.c file
+ * 硬件配置（CubeMX 已生成，无需修改）:
+ *     TRIG -> PB1   (GPIO 推挽输出, User Label = HCSR04_TRIG)
+ *     ECHO -> PA0   (TIM2_CH1 输入捕获)
+ *     TIM2 : Prescaler=71  -> 1 tick = 1 us
+ *            ARR=65535     -> 最大可测约 65.5 ms (远超 HC-SR04 量程)
+ *            TIM2 全局中断已使能 (优先级 1)
+ *
+ * 使用方法:
+ *     1. main() 中调用 InitHCSR04() 一次;
+ *     2. 主循环中调用 HCSR04GetDistance() 即可拿到距离 (单位 mm),
+ *        -1 表示超时(无回波或距离超过 ~4 m).
+ *     3. 两次测量之间建议间隔 >= 60 ms 以避免回波串扰.
+ *
+ * 注意:
+ *     - 本文件实现了 HAL_TIM_IC_CaptureCallback 弱回调, 不要在其它文件
+ *       中再定义同名函数, 否则会冲突.
+ *     - 触发脉冲依赖 DWT 计数器实现的微秒级延时, InitHCSR04() 已自动启用.
  */
 
-
-
-/**
- * Implement this function. See instruction at the top of this file.
- */
-void EnableHCSR04PeriphClock();
-
-/**
- * Initialization of HCSR04's peripherals
- */
-void InitHCSR04();
-
-/**
- * Measure distance and get value in mm. Lower than 0 means no echo signal: distance more than ~3m.
- */
-int32_t HCSR04GetDistance();
+void    InitHCSR04(void);
+int32_t HCSR04GetDistance(void);
 
 #endif /* STM32F10X_HC_SR04_H_ */

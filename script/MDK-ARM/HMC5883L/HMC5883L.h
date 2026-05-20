@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-#define I2C hi2c1
+#define I2C hi2c2
 #define HMC5883L_ADDRESS              0x1E // this device only has one address
 #define HMC5883L_DEFAULT_ADDRESS    (HMC5883L_ADDRESS<<1) // 0x3C
 
@@ -78,6 +78,13 @@ typedef struct
     float YAxis;
     float ZAxis;
 } Vector;
+
+	/* 一次性配置: ±1.3Ga / 15Hz / 8 次平均 / 连续测量模式
+	 * 返回 1 = 成功 (ID 寄存器 = 'H'=0x48), 返回 0 = 通信失败 */
+	uint8_t HMC5883L_Init(void);
+
+	/* 读取相对磁北航向 (0~360°, 顺时针递增) */
+	float HMC5883L_GetHeading(void);
 
 	Vector HMC5883L_readRaw(void);
 	Vector HMC5883L_readNormalize(void);

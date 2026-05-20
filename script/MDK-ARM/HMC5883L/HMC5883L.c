@@ -1,12 +1,42 @@
 
 #include "HMC5883L.h"
-//#include <math.h>
+#include <math.h>
 
 float mgPerDigit;
 Vector v;
 int xOffset, yOffset;
 
 extern I2C_HandleTypeDef I2C;
+
+#define HMC5883L_ID_A_VAL  0x48   /* ID 寄存器 A 应读到 ASCII 'H' */
+
+uint8_t HMC5883L_Init(void)
+{
+    /* 通信验证: 读取 ID_A, 应为 'H' = 0x48 */
+    if (HMC5883L_readRegister8(HMC5883L_REG_IDENT_A) != HMC5883L_ID_A_VAL) {
+        return 0;
+    }
+
+    /* 默认硬铁补偿 0 (如需精确, 请在外部调用 HMC5883L_setOffset 写入校准值) */
+    HMC5883L_setOffset(0, 0);
+
+    HMC5883L_setSamples(HMC5883L_SAMPLES_8);          /* 8 次内部平均, 抑制噪声 */
+    HMC5883L_setDataRate(HMC5883L_DATARATE_15HZ);     /* 15 Hz 输出 */
+    HMC5883L_setRange(HMC5883L_RANGE_1_3GA);          /* ±1.3 Ga, 同步更新 mgPerDigit */
+    HMC5883L_setMeasurementMode(HMC5883L_CONTINOUS);  /* 连续测量 */
+
+    HAL_Delay(10);   /* 等待首次数据就绪 */
+    return 1;
+}
+
+float HMC5883L_GetHeading(void)
+{
+    Vector m = HMC5883L_readNormalize();
+    float heading = atan2f(m.YAxis, m.XAxis) * (180.0f / 3.14159265f);
+    if (heading < 0.0f)   heading += 360.0f;
+    if (heading >= 360.0f) heading -= 360.0f;
+    return heading;
+}
 
 Vector HMC5883L_readRaw(void)
 {
