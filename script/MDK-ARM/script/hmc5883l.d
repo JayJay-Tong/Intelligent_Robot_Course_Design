@@ -30,3 +30,4 @@ script\hmc5883l.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h
 script\hmc5883l.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 script\hmc5883l.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 script\hmc5883l.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
+script\hmc5883l.o: F:\Keil_v5_MDK\ARM\ARMCC\Bin\..\include\math.h

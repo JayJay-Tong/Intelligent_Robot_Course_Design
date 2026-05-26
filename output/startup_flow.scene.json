@@ -1,0 +1,213 @@
+{
+  "version": "0.1",
+  "metadata": {
+    "title": "STM32 智能机器人上电启动流程",
+    "created_by": "visiomaster",
+    "style_profile": "clean_white",
+    "fidelity": "clean_redraw",
+    "notes": [
+      "上电启动流程 - 3.1节",
+      "竖向流程图，clean_white 风格，中文字体 Microsoft YaHei UI"
+    ]
+  },
+  "page": {
+    "width": 7.0,
+    "height": 10.2,
+    "units": "in",
+    "origin": "top-left",
+    "background": "#FAFAFA"
+  },
+  "nodes": [
+    {
+      "id": "start",
+      "type": "terminator",
+      "x": 2.0,
+      "y": 0.3,
+      "w": 3.0,
+      "h": 0.5,
+      "text": "上电（开电源开关）",
+      "style": {
+        "fill": "#16A34A",
+        "line": "#15803D",
+        "line_weight_pt": 1.5,
+        "text_color": "#FFFFFF",
+        "font_family": "Microsoft YaHei UI",
+        "font_size_pt": 11,
+        "font_weight": "bold"
+      }
+    },
+    {
+      "id": "power_mgmt",
+      "type": "process_box",
+      "x": 1.25,
+      "y": 1.25,
+      "w": 4.5,
+      "h": 1.15,
+      "text": "电源管理子电路启动\nVCCBAT → A1117-3.3 → 3.3V\nMCU 上电复位（POR）",
+      "style": {
+        "fill": "#EFF6FF",
+        "line": "#3B82F6",
+        "line_weight_pt": 1.8,
+        "text_color": "#1E3A5F",
+        "font_family": "Microsoft YaHei UI",
+        "font_size_pt": 10,
+        "rounding_in": 0.06
+      }
+    },
+    {
+      "id": "bootloader",
+      "type": "process_box",
+      "x": 1.25,
+      "y": 2.85,
+      "w": 4.5,
+      "h": 0.8,
+      "text": "启动 Bootloader（依 BOOT0）\nBOOT0 = 0 → 从 Flash 启动",
+      "style": {
+        "fill": "#F0FDF4",
+        "line": "#22C55E",
+        "line_weight_pt": 1.8,
+        "text_color": "#14532D",
+        "font_family": "Microsoft YaHei UI",
+        "font_size_pt": 10,
+        "rounding_in": 0.06
+      }
+    },
+    {
+      "id": "main_init",
+      "type": "process_box",
+      "x": 1.25,
+      "y": 4.1,
+      "w": 4.5,
+      "h": 2.55,
+      "text": "main() 执行外设初始化\n─────────────────────────\nRCC / SysTick / GPIO\nTIM4 → PWM 输出（PB6/7/8/9）\nPA11 / PA12 → 上拉输入（红外）\nPA15 → 上拉输入（启动按键）\nPA9 / PA10 → USART1 调试串口\nPB14/PB15 → 超声波 GPIO + TIM2\nPB10/PB11 → I²C2，初始化 CJ-M49\n执行 200 ms 加速度计零偏校准",
+      "style": {
+        "fill": "#EFF6FF",
+        "line": "#2563EB",
+        "line_weight_pt": 1.8,
+        "text_color": "#1E3A5F",
+        "font_family": "Microsoft YaHei UI",
+        "font_size_pt": 9.5,
+        "rounding_in": 0.06
+      }
+    },
+    {
+      "id": "wait_key",
+      "type": "decision_diamond",
+      "x": 1.8,
+      "y": 7.1,
+      "w": 3.4,
+      "h": 1.0,
+      "text": "等待按键按下\nKey_GetNum() != 0 ?",
+      "style": {
+        "fill": "#FFF7ED",
+        "line": "#F97316",
+        "line_weight_pt": 1.8,
+        "text_color": "#7C2D12",
+        "font_family": "Microsoft YaHei UI",
+        "font_size_pt": 9.5
+      }
+    },
+    {
+      "id": "main_loop",
+      "type": "process_box",
+      "x": 1.25,
+      "y": 8.55,
+      "w": 4.5,
+      "h": 0.85,
+      "text": "进入主控制循环\nwhile(1)  {  感知 → 决策 → 执行  }",
+      "style": {
+        "fill": "#F0FDF4",
+        "line": "#16A34A",
+        "line_weight_pt": 1.8,
+        "text_color": "#14532D",
+        "font_family": "Microsoft YaHei UI",
+        "font_size_pt": 10,
+        "rounding_in": 0.06
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_start_to_power",
+      "type": "arrow_connector",
+      "from": "start:bottom",
+      "to": "power_mgmt:top",
+      "route": "vertical",
+      "style": {
+        "line": "#64748B",
+        "line_weight_pt": 1.5,
+        "end_arrow": "triangle"
+      }
+    },
+    {
+      "id": "e_power_to_boot",
+      "type": "arrow_connector",
+      "from": "power_mgmt:bottom",
+      "to": "bootloader:top",
+      "route": "vertical",
+      "style": {
+        "line": "#64748B",
+        "line_weight_pt": 1.5,
+        "end_arrow": "triangle"
+      }
+    },
+    {
+      "id": "e_boot_to_init",
+      "type": "arrow_connector",
+      "from": "bootloader:bottom",
+      "to": "main_init:top",
+      "route": "vertical",
+      "style": {
+        "line": "#64748B",
+        "line_weight_pt": 1.5,
+        "end_arrow": "triangle"
+      }
+    },
+    {
+      "id": "e_init_to_decision",
+      "type": "arrow_connector",
+      "from": "main_init:bottom",
+      "to": "wait_key:top",
+      "route": "vertical",
+      "style": {
+        "line": "#64748B",
+        "line_weight_pt": 1.5,
+        "end_arrow": "triangle"
+      }
+    },
+    {
+      "id": "e_decision_yes",
+      "type": "arrow_connector",
+      "from": "wait_key:bottom",
+      "to": "main_loop:top",
+      "route": "vertical",
+      "label": "是（按下）",
+      "style": {
+        "line": "#16A34A",
+        "line_weight_pt": 1.5,
+        "end_arrow": "triangle",
+        "text_color": "#15803D",
+        "font_family": "Microsoft YaHei UI",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "e_decision_no",
+      "type": "arrow_connector",
+      "from": "wait_key:right",
+      "to": "wait_key:top",
+      "points": [[6.1, 7.6], [6.1, 6.75], [3.5, 6.75]],
+      "label": "否（等待）",
+      "style": {
+        "line": "#F97316",
+        "line_weight_pt": 1.3,
+        "line_dash": "dash",
+        "end_arrow": "triangle",
+        "text_color": "#EA580C",
+        "font_family": "Microsoft YaHei UI",
+        "font_size_pt": 9
+      }
+    }
+  ],
+  "assets": []
+}

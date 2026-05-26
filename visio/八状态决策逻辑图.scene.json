@@ -1,0 +1,649 @@
+{
+  "version": "0.1",
+  "metadata": {
+    "title": "三传感器八状态决策逻辑图",
+    "created_by": "visiomaster",
+    "style_profile": "clean_white",
+    "notes": ["8-state decision table for maze navigation: F(far/close) x L(wall/none) x R(wall/none)"]
+  },
+  "page": {
+    "width": 14.5,
+    "height": 7.2,
+    "units": "in",
+    "origin": "top-left",
+    "background": "#FFFFFF"
+  },
+  "nodes": [
+    {
+      "id": "read_input",
+      "type": "rounded_process",
+      "x": 5.25,
+      "y": 0.2,
+      "w": 4.0,
+      "h": 1.15,
+      "text": "读取三路传感器\nF = US_IsFrontWall()\nL = IR_GetLeft()     R = IR_GetRight()",
+      "style": {
+        "fill": "#DCFCE7",
+        "line": "#15803D",
+        "line_weight_pt": 1.5,
+        "text_color": "#14532D",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "jp_fork",
+      "type": "junction_point",
+      "x": 7.22,
+      "y": 1.58,
+      "w": 0.06,
+      "h": 0.06,
+      "style": {
+        "fill": "none",
+        "line": "none"
+      }
+    },
+    {
+      "id": "f_far_hdr",
+      "type": "process_box",
+      "x": 0.3,
+      "y": 1.78,
+      "w": 6.2,
+      "h": 0.75,
+      "text": "F 远（前方畅通：距离 > 15 cm）",
+      "style": {
+        "fill": "#BFDBFE",
+        "line": "#1D4ED8",
+        "line_weight_pt": 1.5,
+        "text_color": "#1E3A8A",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "f_close_hdr",
+      "type": "process_box",
+      "x": 8.0,
+      "y": 1.78,
+      "w": 6.2,
+      "h": 0.75,
+      "text": "F 近（前方有墙：距离 ≤ 15 cm）",
+      "style": {
+        "fill": "#FDE68A",
+        "line": "#D97706",
+        "line_weight_pt": 1.5,
+        "text_color": "#78350F",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "s1_cond",
+      "type": "process_box",
+      "x": 0.3,
+      "y": 2.82,
+      "w": 1.35,
+      "h": 0.85,
+      "text": "L:有墙\nR:有墙",
+      "style": {
+        "fill": "#EFF6FF",
+        "line": "#1D4ED8",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "s2_cond",
+      "type": "process_box",
+      "x": 1.85,
+      "y": 2.82,
+      "w": 1.35,
+      "h": 0.85,
+      "text": "L:无墙\nR:有墙",
+      "style": {
+        "fill": "#EFF6FF",
+        "line": "#1D4ED8",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "s3_cond",
+      "type": "process_box",
+      "x": 3.4,
+      "y": 2.82,
+      "w": 1.35,
+      "h": 0.85,
+      "text": "L:有墙\nR:无墙",
+      "style": {
+        "fill": "#EFF6FF",
+        "line": "#1D4ED8",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "s4_cond",
+      "type": "process_box",
+      "x": 4.95,
+      "y": 2.82,
+      "w": 1.35,
+      "h": 0.85,
+      "text": "L:无墙\nR:无墙",
+      "style": {
+        "fill": "#EFF6FF",
+        "line": "#1D4ED8",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "s5_cond",
+      "type": "process_box",
+      "x": 8.0,
+      "y": 2.82,
+      "w": 1.35,
+      "h": 0.85,
+      "text": "L:有墙\nR:有墙",
+      "style": {
+        "fill": "#FEF9C3",
+        "line": "#D97706",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "s6_cond",
+      "type": "process_box",
+      "x": 9.55,
+      "y": 2.82,
+      "w": 1.35,
+      "h": 0.85,
+      "text": "L:无墙\nR:有墙",
+      "style": {
+        "fill": "#FEF9C3",
+        "line": "#D97706",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "s7_cond",
+      "type": "process_box",
+      "x": 11.1,
+      "y": 2.82,
+      "w": 1.35,
+      "h": 0.85,
+      "text": "L:有墙\nR:无墙",
+      "style": {
+        "fill": "#FEF9C3",
+        "line": "#D97706",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "s8_cond",
+      "type": "process_box",
+      "x": 12.65,
+      "y": 2.82,
+      "w": 1.55,
+      "h": 0.85,
+      "text": "L:无墙\nR:无墙",
+      "style": {
+        "fill": "#FEF9C3",
+        "line": "#D97706",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "a1_action",
+      "type": "process_box",
+      "x": 0.3,
+      "y": 3.97,
+      "w": 1.35,
+      "h": 0.85,
+      "text": "直行",
+      "style": {
+        "fill": "#BBF7D0",
+        "line": "#15803D",
+        "line_weight_pt": 1.5,
+        "text_color": "#14532D",
+        "font_size_pt": 12
+      }
+    },
+    {
+      "id": "a2_action",
+      "type": "process_box",
+      "x": 1.85,
+      "y": 3.97,
+      "w": 1.35,
+      "h": 0.85,
+      "text": "左转\n90°",
+      "style": {
+        "fill": "#FEF9C3",
+        "line": "#CA8A04",
+        "text_color": "#78350F",
+        "font_size_pt": 11
+      }
+    },
+    {
+      "id": "a3_action",
+      "type": "process_box",
+      "x": 3.4,
+      "y": 3.97,
+      "w": 1.35,
+      "h": 0.85,
+      "text": "右转\n90°",
+      "style": {
+        "fill": "#FEF9C3",
+        "line": "#CA8A04",
+        "text_color": "#78350F",
+        "font_size_pt": 11
+      }
+    },
+    {
+      "id": "a4_action",
+      "type": "process_box",
+      "x": 4.95,
+      "y": 3.97,
+      "w": 1.35,
+      "h": 0.85,
+      "text": "右转 90°\n(十字优先)",
+      "style": {
+        "fill": "#FEF9C3",
+        "line": "#CA8A04",
+        "text_color": "#78350F",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "a5_action",
+      "type": "process_box",
+      "x": 8.0,
+      "y": 3.97,
+      "w": 1.35,
+      "h": 0.85,
+      "text": "掉头\n180°",
+      "style": {
+        "fill": "#FEE2E2",
+        "line": "#B91C1C",
+        "line_weight_pt": 1.5,
+        "text_color": "#7F1D1D",
+        "font_size_pt": 11
+      }
+    },
+    {
+      "id": "a5_note",
+      "type": "text_block",
+      "x": 8.0,
+      "y": 4.88,
+      "w": 1.35,
+      "h": 0.35,
+      "text": "（死端口）",
+      "style": {
+        "fill": "none",
+        "line": "none",
+        "text_color": "#B91C1C",
+        "font_size_pt": 8
+      }
+    },
+    {
+      "id": "a6_action",
+      "type": "process_box",
+      "x": 9.55,
+      "y": 3.97,
+      "w": 1.35,
+      "h": 0.85,
+      "text": "左转\n90°",
+      "style": {
+        "fill": "#FEF9C3",
+        "line": "#CA8A04",
+        "text_color": "#78350F",
+        "font_size_pt": 11
+      }
+    },
+    {
+      "id": "a7_action",
+      "type": "process_box",
+      "x": 11.1,
+      "y": 3.97,
+      "w": 1.35,
+      "h": 0.85,
+      "text": "右转\n90°",
+      "style": {
+        "fill": "#FEF9C3",
+        "line": "#CA8A04",
+        "text_color": "#78350F",
+        "font_size_pt": 11
+      }
+    },
+    {
+      "id": "a8_action",
+      "type": "process_box",
+      "x": 12.65,
+      "y": 3.97,
+      "w": 1.55,
+      "h": 0.85,
+      "text": "右转 90°\n(T形优先)",
+      "style": {
+        "fill": "#FEF9C3",
+        "line": "#CA8A04",
+        "text_color": "#78350F",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "post_jp",
+      "type": "junction_point",
+      "x": 7.22,
+      "y": 5.3,
+      "w": 0.06,
+      "h": 0.06,
+      "style": {
+        "fill": "none",
+        "line": "none"
+      }
+    },
+    {
+      "id": "post_action",
+      "type": "rounded_process",
+      "x": 3.75,
+      "y": 5.7,
+      "w": 7.0,
+      "h": 1.1,
+      "text": "执行动作完成后\n转弯类：盲走进廊 150 mm → 返回主循环\n直行类：直接返回主循环读取传感器",
+      "style": {
+        "fill": "#DCFCE7",
+        "line": "#15803D",
+        "line_weight_pt": 1.25,
+        "text_color": "#14532D",
+        "font_size_pt": 10
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_in_jp",
+      "type": "join_connector",
+      "from": "read_input:bottom",
+      "to": "jp_fork",
+      "route": "vertical",
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.25,
+        "end_arrow": "none"
+      }
+    },
+    {
+      "id": "e_jp_far",
+      "type": "fork_connector",
+      "from": "jp_fork",
+      "to": "f_far_hdr:top@0.5",
+      "points": [
+        [3.4, 1.61]
+      ],
+      "style": {
+        "line": "#1D4ED8",
+        "line_weight_pt": 1.25,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_jp_close",
+      "type": "fork_connector",
+      "from": "jp_fork",
+      "to": "f_close_hdr:top@0.5",
+      "points": [
+        [11.1, 1.61]
+      ],
+      "style": {
+        "line": "#D97706",
+        "line_weight_pt": 1.25,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_far_s1",
+      "type": "arrow_connector",
+      "from": "f_far_hdr:bottom@0.11",
+      "to": "s1_cond:top",
+      "route": "vertical",
+      "style": {
+        "line": "#1D4ED8",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_far_s2",
+      "type": "arrow_connector",
+      "from": "f_far_hdr:bottom@0.37",
+      "to": "s2_cond:top",
+      "route": "vertical",
+      "style": {
+        "line": "#1D4ED8",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_far_s3",
+      "type": "arrow_connector",
+      "from": "f_far_hdr:bottom@0.63",
+      "to": "s3_cond:top",
+      "route": "vertical",
+      "style": {
+        "line": "#1D4ED8",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_far_s4",
+      "type": "arrow_connector",
+      "from": "f_far_hdr:bottom@0.88",
+      "to": "s4_cond:top",
+      "route": "vertical",
+      "style": {
+        "line": "#1D4ED8",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_close_s5",
+      "type": "arrow_connector",
+      "from": "f_close_hdr:bottom@0.11",
+      "to": "s5_cond:top",
+      "route": "vertical",
+      "style": {
+        "line": "#D97706",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_close_s6",
+      "type": "arrow_connector",
+      "from": "f_close_hdr:bottom@0.37",
+      "to": "s6_cond:top",
+      "route": "vertical",
+      "style": {
+        "line": "#D97706",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_close_s7",
+      "type": "arrow_connector",
+      "from": "f_close_hdr:bottom@0.63",
+      "to": "s7_cond:top",
+      "route": "vertical",
+      "style": {
+        "line": "#D97706",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_close_s8",
+      "type": "arrow_connector",
+      "from": "f_close_hdr:bottom@0.88",
+      "to": "s8_cond:top",
+      "route": "vertical",
+      "style": {
+        "line": "#D97706",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_s1_a1",
+      "type": "arrow_connector",
+      "from": "s1_cond:bottom",
+      "to": "a1_action:top",
+      "route": "vertical",
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_s2_a2",
+      "type": "arrow_connector",
+      "from": "s2_cond:bottom",
+      "to": "a2_action:top",
+      "route": "vertical",
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_s3_a3",
+      "type": "arrow_connector",
+      "from": "s3_cond:bottom",
+      "to": "a3_action:top",
+      "route": "vertical",
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_s4_a4",
+      "type": "arrow_connector",
+      "from": "s4_cond:bottom",
+      "to": "a4_action:top",
+      "route": "vertical",
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_s5_a5",
+      "type": "arrow_connector",
+      "from": "s5_cond:bottom",
+      "to": "a5_action:top",
+      "route": "vertical",
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_s6_a6",
+      "type": "arrow_connector",
+      "from": "s6_cond:bottom",
+      "to": "a6_action:top",
+      "route": "vertical",
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_s7_a7",
+      "type": "arrow_connector",
+      "from": "s7_cond:bottom",
+      "to": "a7_action:top",
+      "route": "vertical",
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_s8_a8",
+      "type": "arrow_connector",
+      "from": "s8_cond:bottom",
+      "to": "a8_action:top",
+      "route": "vertical",
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_left_post",
+      "type": "join_connector",
+      "from": "a2_action:bottom",
+      "to": "post_jp",
+      "points": [
+        [2.525, 5.3]
+      ],
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.0,
+        "end_arrow": "none"
+      }
+    },
+    {
+      "id": "e_right_post",
+      "type": "join_connector",
+      "from": "a7_action:bottom",
+      "to": "post_jp",
+      "points": [
+        [11.775, 5.3]
+      ],
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.0,
+        "end_arrow": "none"
+      }
+    },
+    {
+      "id": "e_jp_post",
+      "type": "arrow_connector",
+      "from": "post_jp",
+      "to": "post_action:top@0.5",
+      "route": "vertical",
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.25,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    }
+  ],
+  "assets": []
+}

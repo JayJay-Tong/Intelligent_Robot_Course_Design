@@ -1,0 +1,352 @@
+{
+  "version": "0.1",
+  "metadata": {
+    "title": "软件模块层次结构框图",
+    "created_by": "visiomaster",
+    "style_profile": "clean_white",
+    "notes": ["Three-layer software architecture: Application / Algorithm / Driver"]
+  },
+  "page": {
+    "width": 12.5,
+    "height": 7.2,
+    "units": "in",
+    "origin": "top-left",
+    "background": "#FFFFFF"
+  },
+  "nodes": [
+    {
+      "id": "app_container",
+      "type": "group_container",
+      "x": 0.4,
+      "y": 0.3,
+      "w": 11.7,
+      "h": 1.4,
+      "text": "应用层",
+      "style": {
+        "fill": "#EFF6FF",
+        "line": "#1D4ED8",
+        "line_weight_pt": 1.5,
+        "line_dash": "solid",
+        "text_color": "#1E3A8A",
+        "font_size_pt": 11,
+        "rounding_in": 0.08,
+        "title_align": 0,
+        "title_pad_x_in": 0.1,
+        "title_pad_y_in": 0.05
+      }
+    },
+    {
+      "id": "main_box",
+      "type": "process_box",
+      "x": 0.75,
+      "y": 0.55,
+      "w": 11.0,
+      "h": 0.9,
+      "text": "main.c     初始化 → 零偏校准 → 按键等待 → while(1){ 感知 → 决策 → 执行 }",
+      "container_id": "app_container",
+      "style": {
+        "fill": "#BFDBFE",
+        "line": "#1D4ED8",
+        "line_weight_pt": 1.25,
+        "text_color": "#1E3A8A",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "algo_container",
+      "type": "group_container",
+      "x": 0.4,
+      "y": 2.05,
+      "w": 11.7,
+      "h": 2.0,
+      "text": "算法层",
+      "style": {
+        "fill": "#F0FDF4",
+        "line": "#15803D",
+        "line_weight_pt": 1.5,
+        "line_dash": "solid",
+        "text_color": "#14532D",
+        "font_size_pt": 11,
+        "rounding_in": 0.08,
+        "title_align": 0,
+        "title_pad_x_in": 0.1,
+        "title_pad_y_in": 0.05
+      }
+    },
+    {
+      "id": "maze_box",
+      "type": "process_box",
+      "x": 0.75,
+      "y": 2.3,
+      "w": 5.3,
+      "h": 1.5,
+      "text": "maze.c\n三传感器八状态机\n右手法则路口决策",
+      "container_id": "algo_container",
+      "style": {
+        "fill": "#BBF7D0",
+        "line": "#15803D",
+        "line_weight_pt": 1.25,
+        "text_color": "#14532D",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "turn_box",
+      "type": "process_box",
+      "x": 6.55,
+      "y": 2.3,
+      "w": 5.3,
+      "h": 1.5,
+      "text": "turn.c\n加速度计闭环转弯\n盲走进廊控制",
+      "container_id": "algo_container",
+      "style": {
+        "fill": "#BBF7D0",
+        "line": "#15803D",
+        "line_weight_pt": 1.25,
+        "text_color": "#14532D",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "iface_label",
+      "type": "text_block",
+      "x": 0.9,
+      "y": 4.22,
+      "w": 10.7,
+      "h": 0.28,
+      "text": "Robot_Forward / TurnLeft90 / TurnRight90 / UTurn180 / Stop",
+      "style": {
+        "fill": "none",
+        "line": "none",
+        "text_color": "#475569",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "drv_container",
+      "type": "group_container",
+      "x": 0.4,
+      "y": 4.6,
+      "w": 11.7,
+      "h": 2.3,
+      "text": "驱动层",
+      "style": {
+        "fill": "#FFFBEB",
+        "line": "#D97706",
+        "line_weight_pt": 1.5,
+        "line_dash": "solid",
+        "text_color": "#92400E",
+        "font_size_pt": 11,
+        "rounding_in": 0.08,
+        "title_align": 0,
+        "title_pad_x_in": 0.1,
+        "title_pad_y_in": 0.05
+      }
+    },
+    {
+      "id": "pwm_drv",
+      "type": "process_box",
+      "x": 0.65,
+      "y": 4.88,
+      "w": 1.7,
+      "h": 1.75,
+      "text": "PWM.c\nTIM4\n四路PWM\n20 kHz",
+      "container_id": "drv_container",
+      "style": {
+        "fill": "#FDE68A",
+        "line": "#D97706",
+        "line_weight_pt": 1.25,
+        "text_color": "#78350F",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "motor_drv",
+      "type": "process_box",
+      "x": 2.55,
+      "y": 4.88,
+      "w": 1.9,
+      "h": 1.75,
+      "text": "Motor.c\nrobot.c\n差速运动\n前进/转弯/停止",
+      "container_id": "drv_container",
+      "style": {
+        "fill": "#FDE68A",
+        "line": "#D97706",
+        "line_weight_pt": 1.25,
+        "text_color": "#78350F",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "key_drv",
+      "type": "process_box",
+      "x": 4.65,
+      "y": 4.88,
+      "w": 1.7,
+      "h": 1.75,
+      "text": "Key.c\nPA15\n按键消抖\n状态读取",
+      "container_id": "drv_container",
+      "style": {
+        "fill": "#FDE68A",
+        "line": "#D97706",
+        "line_weight_pt": 1.25,
+        "text_color": "#78350F",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "ir_drv",
+      "type": "process_box",
+      "x": 6.55,
+      "y": 4.88,
+      "w": 1.9,
+      "h": 1.75,
+      "text": "Irobstacle.c\nPA11/PA12\n红外读取\nIR_GetLeft/Right",
+      "container_id": "drv_container",
+      "style": {
+        "fill": "#FDE68A",
+        "line": "#D97706",
+        "line_weight_pt": 1.25,
+        "text_color": "#78350F",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "us_drv",
+      "type": "process_box",
+      "x": 8.65,
+      "y": 4.88,
+      "w": 1.75,
+      "h": 1.75,
+      "text": "Ultrasonic.c\nTIM2\n超声测距\nUS_GetDistMM",
+      "container_id": "drv_container",
+      "style": {
+        "fill": "#FDE68A",
+        "line": "#D97706",
+        "line_weight_pt": 1.25,
+        "text_color": "#78350F",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "imu_drv",
+      "type": "process_box",
+      "x": 10.6,
+      "y": 4.88,
+      "w": 1.25,
+      "h": 1.75,
+      "text": "IMU.c\nI2C2\n角度积分\nCJ-M49",
+      "container_id": "drv_container",
+      "style": {
+        "fill": "#FDE68A",
+        "line": "#D97706",
+        "line_weight_pt": 1.25,
+        "text_color": "#78350F",
+        "font_size_pt": 9
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_main_maze",
+      "type": "arrow_connector",
+      "from": "main_box:bottom@0.32",
+      "to": "maze_box:top",
+      "route": "vertical",
+      "label": "调用",
+      "allow_cross_container": true,
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.25,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_main_turn",
+      "type": "arrow_connector",
+      "from": "main_box:bottom@0.68",
+      "to": "turn_box:top",
+      "route": "vertical",
+      "label": "调用",
+      "allow_cross_container": true,
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.25,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_maze_motor",
+      "type": "arrow_connector",
+      "from": "maze_box:bottom@0.50",
+      "to": "motor_drv:top",
+      "route": "vertical",
+      "allow_cross_container": true,
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.25,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_maze_ir",
+      "type": "arrow_connector",
+      "from": "maze_box:bottom@0.80",
+      "to": "ir_drv:top",
+      "route": "vertical",
+      "allow_cross_container": true,
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.25,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_maze_us",
+      "type": "arrow_connector",
+      "from": "maze_box:bottom@0.95",
+      "to": "us_drv:top",
+      "route": "vertical",
+      "allow_cross_container": true,
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.25,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_turn_imu",
+      "type": "arrow_connector",
+      "from": "turn_box:bottom@0.80",
+      "to": "imu_drv:top",
+      "route": "vertical",
+      "allow_cross_container": true,
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.25,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_turn_motor",
+      "type": "arrow_connector",
+      "from": "turn_box:bottom@0.20",
+      "to": "motor_drv:top",
+      "route": "vertical",
+      "allow_cross_container": true,
+      "style": {
+        "line": "#334155",
+        "line_weight_pt": 1.25,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    }
+  ],
+  "assets": []
+}

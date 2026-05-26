@@ -1,0 +1,601 @@
+{
+  "version": "0.1",
+  "metadata": {
+    "title": "系统硬件连接图",
+    "created_by": "visiomaster",
+    "style_profile": "clean_white",
+    "notes": ["Hardware connection diagram: external modules <-> STM32_10B board <-> L298N + motors"]
+  },
+  "page": {
+    "width": 14.5,
+    "height": 9.0,
+    "units": "in",
+    "origin": "top-left",
+    "background": "#FFFFFF"
+  },
+  "nodes": [
+    {
+      "id": "ir_left_ext",
+      "type": "process_box",
+      "x": 0.2,
+      "y": 1.5,
+      "w": 2.6,
+      "h": 0.85,
+      "text": "左红外避障模块\n(VCC / GND / DO)",
+      "style": {
+        "fill": "#DBEAFE",
+        "line": "#1D4ED8",
+        "line_weight_pt": 1.25,
+        "text_color": "#1E3A8A",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "ir_right_ext",
+      "type": "process_box",
+      "x": 0.2,
+      "y": 2.65,
+      "w": 2.6,
+      "h": 0.85,
+      "text": "右红外避障模块\n(VCC / GND / DO)",
+      "style": {
+        "fill": "#DBEAFE",
+        "line": "#1D4ED8",
+        "line_weight_pt": 1.25,
+        "text_color": "#1E3A8A",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "hcsr04_ext",
+      "type": "process_box",
+      "x": 0.2,
+      "y": 3.8,
+      "w": 2.6,
+      "h": 0.85,
+      "text": "HC-SR04 超声波模块\n(5V / GND / TRIG / ECHO)",
+      "style": {
+        "fill": "#DBEAFE",
+        "line": "#1D4ED8",
+        "line_weight_pt": 1.25,
+        "text_color": "#1E3A8A",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "cjm49_ext",
+      "type": "process_box",
+      "x": 0.2,
+      "y": 4.95,
+      "w": 2.6,
+      "h": 0.85,
+      "text": "CJ-M49 三轴加速度计\n(3.3V / GND / SCL / SDA)",
+      "style": {
+        "fill": "#DBEAFE",
+        "line": "#1D4ED8",
+        "line_weight_pt": 1.25,
+        "text_color": "#1E3A8A",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "pc_ext",
+      "type": "process_box",
+      "x": 0.2,
+      "y": 7.35,
+      "w": 2.6,
+      "h": 0.85,
+      "text": "PC / 上位机\nUSB 下载 / 调试",
+      "style": {
+        "fill": "#F1F5F9",
+        "line": "#475569",
+        "line_weight_pt": 1.25,
+        "text_color": "#334155",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "board_container",
+      "type": "group_container",
+      "x": 3.3,
+      "y": 0.3,
+      "w": 7.8,
+      "h": 8.4,
+      "text": "STM32_10B 小车底板",
+      "style": {
+        "fill": "#F8FAFC",
+        "line": "#334155",
+        "line_weight_pt": 2.0,
+        "line_dash": "solid",
+        "text_color": "#0F172A",
+        "font_size_pt": 12,
+        "rounding_in": 0.0,
+        "title_align": 0,
+        "title_pad_x_in": 0.12,
+        "title_pad_y_in": 0.06
+      }
+    },
+    {
+      "id": "conn_j3",
+      "type": "process_box",
+      "x": 3.5,
+      "y": 1.5,
+      "w": 2.0,
+      "h": 0.85,
+      "text": "J3 接口\nPA11 左红外",
+      "container_id": "board_container",
+      "style": {
+        "fill": "#E0F2FE",
+        "line": "#0284C7",
+        "line_weight_pt": 1.25,
+        "text_color": "#075985",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "conn_j6",
+      "type": "process_box",
+      "x": 3.5,
+      "y": 2.65,
+      "w": 2.0,
+      "h": 0.85,
+      "text": "J6 接口\nPA12 右红外",
+      "container_id": "board_container",
+      "style": {
+        "fill": "#E0F2FE",
+        "line": "#0284C7",
+        "line_weight_pt": 1.25,
+        "text_color": "#075985",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "conn_p3",
+      "type": "process_box",
+      "x": 3.5,
+      "y": 3.8,
+      "w": 2.0,
+      "h": 0.85,
+      "text": "P3 接口\nPB14=TRIG  PB15=ECHO",
+      "container_id": "board_container",
+      "style": {
+        "fill": "#E0F2FE",
+        "line": "#0284C7",
+        "line_weight_pt": 1.25,
+        "text_color": "#075985",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "conn_p2",
+      "type": "process_box",
+      "x": 3.5,
+      "y": 4.95,
+      "w": 2.0,
+      "h": 0.85,
+      "text": "P2 接口\nPB10=SCL  PB11=SDA",
+      "container_id": "board_container",
+      "style": {
+        "fill": "#E0F2FE",
+        "line": "#0284C7",
+        "line_weight_pt": 1.25,
+        "text_color": "#075985",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "stm32_chip",
+      "type": "process_box",
+      "x": 6.0,
+      "y": 0.8,
+      "w": 2.9,
+      "h": 5.1,
+      "text": "STM32F103C8T6\n(Blue Pill)\n─────────────\nTIM4 → PWM 调速\nTIM2 → 计时\nI2C2 → 加速度计\nUSART1 → CH340C\nGPIO → 传感器/按键",
+      "container_id": "board_container",
+      "style": {
+        "fill": "#DCFCE7",
+        "line": "#15803D",
+        "line_weight_pt": 2.0,
+        "text_color": "#14532D",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "h2_conn",
+      "type": "process_box",
+      "x": 9.1,
+      "y": 1.0,
+      "w": 1.3,
+      "h": 1.2,
+      "text": "H2 排针\nPB6/7/8/9\nPWM 输出",
+      "container_id": "board_container",
+      "style": {
+        "fill": "#FEF3C7",
+        "line": "#D97706",
+        "line_weight_pt": 1.25,
+        "text_color": "#78350F",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "j5_conn",
+      "type": "process_box",
+      "x": 9.1,
+      "y": 2.5,
+      "w": 1.3,
+      "h": 0.85,
+      "text": "J5 接口\nVCCBAT\n电机电源",
+      "container_id": "board_container",
+      "style": {
+        "fill": "#FDE68A",
+        "line": "#D97706",
+        "line_weight_pt": 1.25,
+        "text_color": "#78350F",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "s1_node",
+      "type": "process_box",
+      "x": 3.5,
+      "y": 6.35,
+      "w": 1.1,
+      "h": 0.7,
+      "text": "S1 按键\nPA15",
+      "container_id": "board_container",
+      "style": {
+        "fill": "#F0FDF4",
+        "line": "#15803D",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "buz_node",
+      "type": "process_box",
+      "x": 4.8,
+      "y": 6.35,
+      "w": 1.2,
+      "h": 0.7,
+      "text": "BUZ1 蜂鸣器\nPB0",
+      "container_id": "board_container",
+      "style": {
+        "fill": "#F0FDF4",
+        "line": "#15803D",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "led_node",
+      "type": "process_box",
+      "x": 6.2,
+      "y": 6.35,
+      "w": 1.2,
+      "h": 0.7,
+      "text": "LED 指示灯\nPC13",
+      "container_id": "board_container",
+      "style": {
+        "fill": "#F0FDF4",
+        "line": "#15803D",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "swd_node",
+      "type": "process_box",
+      "x": 7.8,
+      "y": 6.35,
+      "w": 1.4,
+      "h": 0.7,
+      "text": "SWD 调试口\nPA13/PA14",
+      "container_id": "board_container",
+      "style": {
+        "fill": "#F0FDF4",
+        "line": "#15803D",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "ch340c_node",
+      "type": "process_box",
+      "x": 3.5,
+      "y": 7.35,
+      "w": 2.0,
+      "h": 0.9,
+      "text": "CH340C\nUSB → USART1\n一键自动下载",
+      "container_id": "board_container",
+      "style": {
+        "fill": "#E0E7FF",
+        "line": "#4338CA",
+        "line_weight_pt": 1.25,
+        "text_color": "#312E81",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "power_node",
+      "type": "process_box",
+      "x": 6.0,
+      "y": 7.35,
+      "w": 3.0,
+      "h": 0.9,
+      "text": "BT1 锂电池 7.4V  →  A1117-3.3 LDO\n提供 3.3V (MCU/传感器) / VCCBAT (电机)",
+      "container_id": "board_container",
+      "style": {
+        "fill": "#FEF3C7",
+        "line": "#D97706",
+        "line_weight_pt": 1.25,
+        "text_color": "#78350F",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "l298n_ext",
+      "type": "process_box",
+      "x": 11.4,
+      "y": 0.8,
+      "w": 2.8,
+      "h": 2.2,
+      "text": "L298N 双路 H 桥\nIN1~IN4 PWM 控制\nENA/ENB 常使能\nVS = VCCBAT (7.4V)",
+      "style": {
+        "fill": "#FEE2E2",
+        "line": "#B91C1C",
+        "line_weight_pt": 1.5,
+        "text_color": "#7F1D1D",
+        "font_size_pt": 10
+      }
+    },
+    {
+      "id": "lmotor_ext",
+      "type": "process_box",
+      "x": 11.4,
+      "y": 3.3,
+      "w": 1.25,
+      "h": 0.9,
+      "text": "左减速电机\nOUT1/OUT2",
+      "style": {
+        "fill": "#FECACA",
+        "line": "#DC2626",
+        "line_weight_pt": 1.25,
+        "text_color": "#7F1D1D",
+        "font_size_pt": 9
+      }
+    },
+    {
+      "id": "rmotor_ext",
+      "type": "process_box",
+      "x": 12.85,
+      "y": 3.3,
+      "w": 1.25,
+      "h": 0.9,
+      "text": "右减速电机\nOUT3/OUT4",
+      "style": {
+        "fill": "#FECACA",
+        "line": "#DC2626",
+        "line_weight_pt": 1.25,
+        "text_color": "#7F1D1D",
+        "font_size_pt": 9
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_irleft_j3",
+      "type": "arrow_connector",
+      "from": "ir_left_ext:right",
+      "to": "conn_j3:left",
+      "route": "horizontal",
+      "label": "3.3V / DO",
+      "allow_cross_container": true,
+      "style": {
+        "line": "#1D4ED8",
+        "line_weight_pt": 1.25,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_irright_j6",
+      "type": "arrow_connector",
+      "from": "ir_right_ext:right",
+      "to": "conn_j6:left",
+      "route": "horizontal",
+      "label": "3.3V / DO",
+      "allow_cross_container": true,
+      "style": {
+        "line": "#1D4ED8",
+        "line_weight_pt": 1.25,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_hcsr04_p3",
+      "type": "arrow_connector",
+      "from": "hcsr04_ext:right",
+      "to": "conn_p3:left",
+      "route": "horizontal",
+      "label": "5V / TRIG / ECHO",
+      "allow_cross_container": true,
+      "style": {
+        "line": "#1D4ED8",
+        "line_weight_pt": 1.25,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_cjm49_p2",
+      "type": "arrow_connector",
+      "from": "cjm49_ext:right",
+      "to": "conn_p2:left",
+      "route": "horizontal",
+      "label": "3.3V / SCL / SDA",
+      "allow_cross_container": true,
+      "style": {
+        "line": "#1D4ED8",
+        "line_weight_pt": 1.25,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_j3_stm32",
+      "type": "arrow_connector",
+      "from": "conn_j3:right",
+      "to": "stm32_chip:left@0.22",
+      "route": "horizontal",
+      "style": {
+        "line": "#0284C7",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_j6_stm32",
+      "type": "arrow_connector",
+      "from": "conn_j6:right",
+      "to": "stm32_chip:left@0.45",
+      "route": "horizontal",
+      "style": {
+        "line": "#0284C7",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_p3_stm32",
+      "type": "arrow_connector",
+      "from": "conn_p3:right",
+      "to": "stm32_chip:left@0.67",
+      "route": "horizontal",
+      "style": {
+        "line": "#0284C7",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_p2_stm32",
+      "type": "arrow_connector",
+      "from": "conn_p2:right",
+      "to": "stm32_chip:left@0.90",
+      "route": "horizontal",
+      "style": {
+        "line": "#0284C7",
+        "line_weight_pt": 1.0,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_stm32_h2",
+      "type": "arrow_connector",
+      "from": "stm32_chip:right@0.16",
+      "to": "h2_conn:left",
+      "route": "horizontal",
+      "label": "PB6/7/8/9",
+      "style": {
+        "line": "#D97706",
+        "line_weight_pt": 1.25,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_h2_l298n",
+      "type": "arrow_connector",
+      "from": "h2_conn:right",
+      "to": "l298n_ext:left@0.28",
+      "route": "horizontal",
+      "label": "IN1~IN4 PWM控制",
+      "allow_cross_container": true,
+      "style": {
+        "line": "#D97706",
+        "line_weight_pt": 1.5,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_j5_l298n",
+      "type": "arrow_connector",
+      "from": "j5_conn:right",
+      "to": "l298n_ext:left@0.88",
+      "route": "horizontal",
+      "label": "VCCBAT 7.4V",
+      "allow_cross_container": true,
+      "style": {
+        "line": "#B91C1C",
+        "line_weight_pt": 1.5,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_l298n_lmot",
+      "type": "arrow_connector",
+      "from": "l298n_ext:bottom@0.22",
+      "to": "lmotor_ext:top",
+      "route": "vertical",
+      "style": {
+        "line": "#B91C1C",
+        "line_weight_pt": 1.5,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_l298n_rmot",
+      "type": "arrow_connector",
+      "from": "l298n_ext:bottom@0.78",
+      "to": "rmotor_ext:top",
+      "route": "vertical",
+      "style": {
+        "line": "#B91C1C",
+        "line_weight_pt": 1.5,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_pc_ch340c",
+      "type": "arrow_connector",
+      "from": "pc_ext:right",
+      "to": "ch340c_node:left",
+      "route": "horizontal",
+      "label": "USB",
+      "allow_cross_container": true,
+      "style": {
+        "line": "#4338CA",
+        "line_weight_pt": 1.25,
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    },
+    {
+      "id": "e_ch340c_stm32",
+      "type": "arrow_connector",
+      "from": "ch340c_node:top",
+      "to": "stm32_chip:bottom@0.02",
+      "route": "orthogonal",
+      "points": [
+        [4.5, 7.2],
+        [6.05, 7.2],
+        [6.05, 5.9]
+      ],
+      "label": "USART1\nPA9/PA10",
+      "allow_cross_container": true,
+      "style": {
+        "line": "#4338CA",
+        "line_weight_pt": 1.25,
+        "line_dash": "dash",
+        "end_arrow": "triangle",
+        "arrow_size": "small"
+      }
+    }
+  ],
+  "assets": []
+}
