@@ -31,3 +31,4 @@ script\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 script\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 script\main.o: ../Inc/tim.h
 script\main.o: ../Inc/gpio.h
+script\main.o: .\HC-SR04\stm32f10x_HC-SR04.h

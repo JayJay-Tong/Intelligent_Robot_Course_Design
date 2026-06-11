@@ -1,7 +1,7 @@
 Dependencies for Project 'script', Target 'script': (DO NOT MODIFY !)
 CompilerVersion: 5060750::V5.06 update 6 (build 750)::.\ARMCC
 F (startup_stm32f103xb.s)(0x6A014ACE)(--cpu Cortex-M3 -g --apcs=interwork --pd "__MICROLIB SETA 1"-I.\RTE\_script-IF:\Keil_v5_MDK\Pack\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IF:\Keil_v5_MDK\Pack\Keil\STM32F1xx_DFP\2.4.1\Device\Include--pd "__UVISION_VERSION SETA 539" --pd "_RTE_ SETA 1" --pd "STM32F10X_MD SETA 1" --pd "_RTE_ SETA 1"--list startup_stm32f103xb.lst --xref -o script\startup_stm32f103xb.o --depend script\startup_stm32f103xb.d)
-F (../Src/main.c)(0x6A150DB8)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I .\HMC5883L -I .\HC-SR04-I.\RTE\_script-IF:\Keil_v5_MDK\Pack\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IF:\Keil_v5_MDK\Pack\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o script\main.o --omf_browse script\main.crf --depend script\main.d)
+F (../Src/main.c)(0x6A262B6A)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I .\HMC5883L -I .\HC-SR04-I.\RTE\_script-IF:\Keil_v5_MDK\Pack\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IF:\Keil_v5_MDK\Pack\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o script\main.o --omf_browse script\main.crf --depend script\main.d)
 I (../Inc/main.h)(0x6A014ACA)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h)(0x6A014AC3)
 I (../Inc/stm32f1xx_hal_conf.h)(0x6A014ACA)
@@ -33,6 +33,7 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h)(0x6A014AC3)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x6A014AC3)
 I (../Inc/tim.h)(0x6A014AC9)
 I (../Inc/gpio.h)(0x6A014AC9)
+I (.\HC-SR04\stm32f10x_HC-SR04.h)(0x6A0A83DE)
 F (../Src/gpio.c)(0x6A014AC8)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I .\HMC5883L -I .\HC-SR04-I.\RTE\_script-IF:\Keil_v5_MDK\Pack\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IF:\Keil_v5_MDK\Pack\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="539" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o script\gpio.o --omf_browse script\gpio.crf --depend script\gpio.d)
 I (../Inc/gpio.h)(0x6A014AC9)
 I (../Inc/main.h)(0x6A014ACA)

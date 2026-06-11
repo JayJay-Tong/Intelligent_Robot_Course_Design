@@ -27,7 +27,14 @@ Project File Date:  05/26/2026
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'F:\Keil_v5_MDK\ARM\ARMCC\Bin'
 Build target 'script'
-"script\script.axf" - 0 Error(s), 0 Warning(s).
+compiling main.c...
+../Src/main.c(285): warning:  #1-D: last line of file ends without a newline
+  #endif
+../Src/main.c: 1 warning, 0 errors
+linking...
+Program Size: Code=6812 RO-data=304 RW-data=28 ZI-data=1172  
+FromELF: creating hex file...
+"script\script.axf" - 0 Error(s), 1 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -50,7 +57,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE@5.6.0
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:02
 </pre>
 </body>
 </html>

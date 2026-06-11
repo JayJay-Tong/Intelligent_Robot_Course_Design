@@ -1,68 +1,122 @@
 /**
- * 迷宫导航 (右手法则, 双红外, 无串口)
+ * 迷宫小车 - 纯 IR 导航 (无磁力计)
  *
- * 上电 -> PC13 慢闪 (待机) -> 按 PA15 -> 进入迷宫导航
+ * 直线: 两侧 IR 贴墙修正
+ * 转弯: 任一侧 IR 持续丢墙 -> C 型 (两次同向 90°), 用 IR 重新看到墙做对齐
+ * 死路: 超声波 < 10cm -> 原地左转 90° (右手法则)
  *
- * 右手法则状态转移 (基于左右红外):
- *   左有墙 + 右有墙 -> 前进     (在走廊内, 两壁夹行)
- *   左无墙 + 右有墙 -> 左转 90° (左侧出现路口, 转入)
- *   左有墙 + 右无墙 -> 右转 90° (右侧出现路口, 转入)
- *   左无墙 + 右无墙 -> 右转 90° (T 形 / 十字, 右手法则优先)
- *
- * 注: 无前方检测, 死路靠 "双侧均无墙" 间接推断, 实际碰到死胡同会撞墙.
- * 若迷宫有死胡同, 需要再加超声波或撞针. 课程展示的迷宫一般不带死路.
+ * 引脚:
+ *   IR_LEFT  = PA11 (pull-up; 看到墙 = LOW)
+ *   IR_RIGHT = PA12 (pull-up; 看到墙 = LOW)
+ *   超声波 TRIG=PB1, ECHO=PA0
+ *   电机 PWM (TIM4): CH1=左前 CH2=左后 CH3=右前 CH4=右后
+ *   按键 KEY_START = PA15
+ *   LED = PC13
  */
 
 #include "main.h"
 #include "tim.h"
 #include "gpio.h"
+#include "stm32f10x_HC-SR04.h"
 
-#define SPEED_FWD    50    /* 前进 PWM 0~99, 太慢爬不动可加到 55~60 */
-#define SPEED_TURN   55    /* 转弯 PWM, 比前进略大一点克服静摩擦 */
-#define TURN_MS      550   /* 90° 转弯时间; 速度变了这里要等比例调 */
-#define BRAKE_MS     100   /* 转弯前后停顿, 让车体停稳 */
-#define POST_TURN_MS 200   /* 转完后稍微往前一点, 清出弯道 */
+/* ---- 可调参数 ---------------------------------------------------------- */
+#define BASE_SPEED          60      /* 巡航基础 PWM (0~99) */
+#define VERIFY_DIFF         8       /* 验证模式下的微调差速 */
+#define TURN_SPEED          45      /* 原地 90° 旋转 PWM */
+#define U_TURN_PWM          60      /* 180° 掉头 PWM, 略大于 TURN_SPEED 提供更强差速 */
+#define VERIFY_THRESH       7       /* 连续 N 次没找回墙就判为真缺口 (~210ms) */
+#define MIN_SPIN_MS         250     /* 转弯最少先转这么久, 避免初始即时返回 */
+#define SPIN_TIMEOUT_MS     2200    /* 单次旋转最长保护时间 */
+#define APPROACH_MS         800     /* 确认缺口后, 先往前走的预进时间, 让车尾过墙角 */
+#define C_FWD_MS            1100    /* C 型中间前进时长 */
+#define U_TURN_180_MS       1500    /* 死路 180° 掉头时长 (定时, 需现场校准) */
+#define FRONT_STOP_MM       100      /* 前方阈值 */
+#define LOOP_MS             30      /* 巡航主循环节拍 */
+#define SPIN_POLL_MS        10      /* 旋转时 IR 轮询节拍 */
+
+/* IR 读取宏: 引脚 LOW 表示看到墙 */
+#define IR_L_WALL()  (HAL_GPIO_ReadPin(IR_LEFT_GPIO_Port,  IR_LEFT_Pin)  == GPIO_PIN_RESET)
+#define IR_R_WALL()  (HAL_GPIO_ReadPin(IR_RIGHT_GPIO_Port, IR_RIGHT_Pin) == GPIO_PIN_RESET)
 
 void SystemClock_Config(void);
 
-/* 一次写 4 路 PWM (TIM4_CH1~4 -> PB6/PB7/PB8/PB9 -> L298N IN1~IN4) */
-static void Motor_Set(uint32_t l1, uint32_t l2, uint32_t r1, uint32_t r2)
+/* ---- 电机原语 --------------------------------------------------------- */
+static void motor_drive(int l_pwm, int r_pwm)
 {
-    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, l1);
-    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, l2);
-    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, r1);
-    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, r2);
+    if (l_pwm < 0)  l_pwm = 0;  if (l_pwm > 99) l_pwm = 99;
+    if (r_pwm < 0)  r_pwm = 0;  if (r_pwm > 99) r_pwm = 99;
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 0);
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, 0);
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, (uint16_t)l_pwm);
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, (uint16_t)r_pwm);
 }
 
-static void Motor_Forward(void)
+static void motor_stop(void)
 {
-    Motor_Set(SPEED_FWD, 0, SPEED_FWD, 0);
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 0);
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 0);
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, 0);
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, 0);
 }
 
-static void Motor_Stop(void)
+static void motor_spin_right(uint8_t pwm)   /* 顺时针 (俯视) */
 {
-    Motor_Set(0, 0, 0, 0);
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 0);
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, 0);
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, pwm);   /* 左轮前 */
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, pwm);   /* 右轮后 */
 }
 
-/* 左转: 左轮停, 右轮前进, 持续 TURN_MS */
-static void Motor_TurnLeft(void)
+static void motor_spin_left(uint8_t pwm)    /* 逆时针 (俯视) */
 {
-    Motor_Stop();              HAL_Delay(BRAKE_MS);
-    Motor_Set(0, 0, SPEED_TURN, 0);
-    HAL_Delay(TURN_MS);
-    Motor_Stop();              HAL_Delay(BRAKE_MS);
-    /* 转完往前一点, 避免重复检测同一个路口 */
-    Motor_Forward();           HAL_Delay(POST_TURN_MS);
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 0);
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, 0);
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, pwm);   /* 左轮后 */
+    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, pwm);   /* 右轮前 */
 }
 
-/* 右转: 右轮停, 左轮前进, 持续 TURN_MS */
-static void Motor_TurnRight(void)
+/* ---- 旋转直到两侧 IR 都看到墙 (= 对齐到新走廊) ----------------------- */
+/* dir = +1 顺时针(右), -1 逆时针(左) */
+static void spin_until_both_walls(int dir)
 {
-    Motor_Stop();              HAL_Delay(BRAKE_MS);
-    Motor_Set(SPEED_TURN, 0, 0, 0);
-    HAL_Delay(TURN_MS);
-    Motor_Stop();              HAL_Delay(BRAKE_MS);
-    Motor_Forward();           HAL_Delay(POST_TURN_MS);
+    if (dir > 0) motor_spin_right(TURN_SPEED);
+    else         motor_spin_left(TURN_SPEED);
+
+    HAL_Delay(MIN_SPIN_MS);                  /* 先转够最小时间, 避开初始状态 */
+
+    uint32_t t_start = HAL_GetTick();
+    while ((HAL_GetTick() - t_start) < SPIN_TIMEOUT_MS) {
+        if (IR_L_WALL() && IR_R_WALL()) break;
+        HAL_Delay(SPIN_POLL_MS);
+    }
+    motor_stop();
+    HAL_Delay(150);
+}
+
+/* ---- 死路 180° 掉头 (定时, 左轮正向 + 右轮反向, 差速比 90° 转大) ---- */
+static void u_turn_180(void)
+{
+    motor_spin_right(U_TURN_PWM);    /* CH1=左轮前进 CH4=右轮后退 */
+    HAL_Delay(U_TURN_180_MS);
+    motor_stop();
+    HAL_Delay(200);
+}
+
+/* ---- C 型转向: 先预进 -> 转 -> 前进 -> 再转 -------------------------- */
+static void c_turn(int dir)
+{
+    /* 预进: 让整个车身越过墙角, 避免转弯时车尾撞墙 */
+    motor_drive(BASE_SPEED, BASE_SPEED);
+    HAL_Delay(APPROACH_MS);
+    motor_stop();
+    HAL_Delay(100);
+
+    spin_until_both_walls(dir);                  /* 第 1 个 90° */
+    motor_drive(BASE_SPEED, BASE_SPEED);
+    HAL_Delay(C_FWD_MS);                         /* 穿过 U 底部 */
+    motor_stop();
+    HAL_Delay(150);
+    spin_until_both_walls(dir);                  /* 第 2 个 90° */
 }
 
 int main(void)
@@ -70,53 +124,124 @@ int main(void)
     HAL_Init();
     SystemClock_Config();
 
-    /* PC13 板载 LED */
-    __HAL_RCC_GPIOC_CLK_ENABLE();
-    GPIO_InitTypeDef led = {0};
-    led.Pin   = GPIO_PIN_13;
-    led.Mode  = GPIO_MODE_OUTPUT_PP;
-    led.Pull  = GPIO_NOPULL;
-    led.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(GPIOC, &led);
-
-    MX_GPIO_Init();    /* IR_LEFT/IR_RIGHT/KEY_START/HCSR04_TRIG */
+    MX_GPIO_Init();
+    MX_TIM2_Init();
     MX_TIM4_Init();
 
+    /* PC13 LED */
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+    GPIO_InitTypeDef led = {0};
+    led.Pin = GPIO_PIN_13; led.Mode = GPIO_MODE_OUTPUT_PP;
+    led.Pull = GPIO_NOPULL; led.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOC, &led);
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
+
+    /* 电机 PWM */
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);
-    Motor_Stop();
+    motor_stop();
 
-    /* 待机: 等按键, LED 慢闪 */
+    /* 超声波 */
+    InitHCSR04();
+
+    /* 等 KEY_START */
     while (HAL_GPIO_ReadPin(KEY_START_GPIO_Port, KEY_START_Pin) == GPIO_PIN_SET) {
         HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
         HAL_Delay(200);
     }
-    HAL_Delay(50);   /* 消抖 */
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);   /* 进入运行 = 常亮 */
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+    HAL_Delay(300);
 
-    /* 主循环 */
+    /* ---- 巡航主循环 ------------------------------------------------- */
+    int verify_r = 0;
+    int verify_l = 0;
+    int skip_next_gap = 0;   /* 刚掉头, 下一个缺口直走不转 */
+    int in_skip_pass  = 0;   /* 正在穿过被跳过的缺口, 等两侧墙都回来再恢复 */
+
     while (1)
     {
-        /* GPIO_PIN_RESET = 检测到墙, GPIO_PIN_SET = 该侧无墙 (路口) */
-        GPIO_PinState L = HAL_GPIO_ReadPin(IR_LEFT_GPIO_Port,  IR_LEFT_Pin);
-        GPIO_PinState R = HAL_GPIO_ReadPin(IR_RIGHT_GPIO_Port, IR_RIGHT_Pin);
+        uint8_t r_wall = IR_R_WALL();
+        uint8_t l_wall = IR_L_WALL();
+        int32_t dist   = HCSR04GetDistance();
 
-        if (L == GPIO_PIN_RESET && R == GPIO_PIN_RESET) {
-            /* 两侧均有墙 -> 走廊正常行驶 */
-            Motor_Forward();
+        /* 正在穿过被跳过的缺口: 只直行, 等两侧墙回来 */
+        if (in_skip_pass) {
+            motor_drive(BASE_SPEED, BASE_SPEED);
+            if (r_wall && l_wall) {
+                in_skip_pass = 0;
+                verify_r = verify_l = 0;
+            }
+            HAL_Delay(LOOP_MS);
+            continue;
         }
-        else if (L == GPIO_PIN_SET && R == GPIO_PIN_RESET) {
-            /* 左侧路口 -> 左转 */
-            Motor_TurnLeft();
+
+        /* 优先: 前方堵了 -> 死路掉头 180° */
+        if (dist > 0 && dist < FRONT_STOP_MM) {
+            motor_stop();
+            HAL_Delay(100);
+            u_turn_180();
+            skip_next_gap = 1;       /* 掉头后第一个缺口直走 */
+            verify_r = verify_l = 0;
+            continue;
+        }
+
+        if (r_wall && l_wall) {
+            /* 两侧都看到墙: 居中, 直行 */
+            verify_r = verify_l = 0;
+            motor_drive(BASE_SPEED, BASE_SPEED);
+        }
+        else if (!r_wall && l_wall) {
+            /* 右侧丢墙: 漂移 or 真缺口? 先尝试右修正, 验证 */
+            verify_l = 0;
+            verify_r++;
+            if (verify_r >= VERIFY_THRESH) {
+                if (skip_next_gap) {
+                    /* 掉头后的第一个缺口: 直走穿过 */
+                    skip_next_gap = 0;
+                    in_skip_pass  = 1;
+                    verify_r = 0;
+                    motor_drive(BASE_SPEED, BASE_SPEED);
+                } else {
+                    /* 真缺口, C 型右转 */
+                    motor_stop();
+                    HAL_Delay(100);
+                    c_turn(+1);
+                    verify_r = 0;
+                }
+            } else {
+                /* 验证中: 微微右转尝试贴回右墙 */
+                motor_drive(BASE_SPEED + VERIFY_DIFF, BASE_SPEED - VERIFY_DIFF);
+            }
+        }
+        else if (r_wall && !l_wall) {
+            /* 左侧丢墙: 镜像处理 */
+            verify_r = 0;
+            verify_l++;
+            if (verify_l >= VERIFY_THRESH) {
+                if (skip_next_gap) {
+                    skip_next_gap = 0;
+                    in_skip_pass  = 1;
+                    verify_l = 0;
+                    motor_drive(BASE_SPEED, BASE_SPEED);
+                } else {
+                    motor_stop();
+                    HAL_Delay(100);
+                    c_turn(-1);
+                    verify_l = 0;
+                }
+            } else {
+                motor_drive(BASE_SPEED - VERIFY_DIFF, BASE_SPEED + VERIFY_DIFF);
+            }
         }
         else {
-            /* 右侧路口, 或 T形/十字路口 -> 右转 (右手法则优先) */
-            Motor_TurnRight();
+            /* 两侧都没墙: 开阔地, 直行 (一般不会发生) */
+            verify_r = verify_l = 0;
+            motor_drive(BASE_SPEED, BASE_SPEED);
         }
 
-        HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);   /* 心跳指示 */
+        HAL_Delay(LOOP_MS);
     }
 }
 
@@ -146,12 +271,10 @@ void SystemClock_Config(void)
 
 void Error_Handler(void)
 {
+    motor_stop();
     __HAL_RCC_GPIOC_CLK_ENABLE();
     GPIO_InitTypeDef led = {0};
-    led.Pin   = GPIO_PIN_13;
-    led.Mode  = GPIO_MODE_OUTPUT_PP;
-    led.Pull  = GPIO_NOPULL;
-    led.Speed = GPIO_SPEED_FREQ_LOW;
+    led.Pin = GPIO_PIN_13; led.Mode = GPIO_MODE_OUTPUT_PP;
     HAL_GPIO_Init(GPIOC, &led);
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
     while (1) {}
